@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Encrypted Reports</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+
+/* Body & background */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url("{{ url_for('static', filename='images/bg.jpg') }}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Navbar */
+nav {
+    background: #141516;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+nav .logo { font-weight: bold; font-size: 1.2em; }
+nav .menu { display: flex; flex-wrap: wrap; gap: 15px; }
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 5px 12px;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+nav a:hover { background: rgba(255,255,255,0.2); }
+
+/* Container */
+.container {
+    padding: 20px;
+    overflow-x: auto;
+    max-width: 1300px;
+    margin: 20px auto;
+    background-color: rgba(255,255,255,0.88);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+h2 { text-align: center; margin-bottom: 20px; color: #141516; }
+
+/* Table */
+table { width: 100%; border-collapse: collapse; min-width: 800px; }
+th, td { padding: 10px; border: 1px solid #ddd; text-align: left; word-break: break-all; }
+th { background: #111213; color: white; }
+tr:nth-child(even) { background: #f2f2f2; }
+
+/* Buttons */
+button, .action-btn {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    transition: background 0.3s;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+    display: inline-block;
+}
+.decrypt-btn       { background: #007bff; color: white; }
+.decrypt-btn:hover { background: #0056b3; }
+.encrypt-toggle-btn       { background: #fd7e14; color: white; }
+.encrypt-toggle-btn:hover { background: #e06200; }
+.file-dl-btn       { background: #6c757d; color: white; }
+.file-dl-btn:hover { background: #545b62; }
+.pdf-btn           { background: #28a745; color: white; }
+.pdf-btn:hover     { background: #1e7e34; }
+.modal-submit-btn  { background: #007bff; color: white; }
+.modal-submit-btn:hover { background: #0056b3; }
+.modal-cancel-btn  { background: #6c757d; color: white; }
+.modal-cancel-btn:hover { background: #545b62; }
+
+/* Action cell — buttons sit in a horizontal flex row */
+.action-cell {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 5px;
+    align-items: center;
+    min-width: 200px;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+.modal-content {
+    background: white;
+    padding: 28px 24px;
+    border-radius: 10px;
+    width: 340px;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+.modal-content h3 { margin-top: 0; color: #141516; }
+.modal-content input[type=password] {
+    width: 90%;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+.modal-content .modal-btns { margin-top: 16px; display: flex; gap: 10px; justify-content: center; }
+.modal-content .modal-btns button { min-width: 90px; padding: 8px 14px; font-size: 13px; }
+
+@media(max-width:768px){
+    nav { flex-direction: column; align-items: flex-start; }
+    nav .menu { width: 100%; justify-content: flex-start; gap: 10px; margin-top: 8px; }
+}
+</style>
+</head>
+<body>
+   <nav>
+    <div class="logo">Doctor Dashboard</div>
+    <div class="menu">
+        <a href="/doctor_dashboard">Home</a>
+        <a href="/doctor/view_allotted_patients">View Allotted Patients</a>
+        <a href="/doctor/view_encrypted_reports">Decrypt Reports</a>
+        <a href="/logout">Logout</a>
+    </div>
+</nav>
+    <div class="container">
+        <h2>Encrypted Reports</h2>
+        <table>
+            <tr>
+                <th>Patient</th>
+                <th>Temperature</th>
+                <th>Pulse Rate</th>
+                <th>SPO2</th>
+                <th>Height</th>
+                <th>Weight</th>
+                <th>Action</th>
+            </tr>
+            {% for r in reports %}
+            <tr id="row-{{ r.report_enc_id }}"
+                data-enc-temperature="{{ r.enc_temperature }}"
+                data-enc-pulse_rate="{{ r.enc_pulse_rate }}"
+                data-enc-spo2="{{ r.enc_spo2 }}"
+                data-enc-height_cm="{{ r.enc_height_cm }}"
+                data-enc-weight_kg="{{ r.enc_weight_kg }}">
+                <td>{{ r.patient_name }}</td>
+                <td class="temperature">{{ r.enc_temperature }}</td>
+                <td class="pulse_rate">{{ r.enc_pulse_rate }}</td>
+                <td class="spo2">{{ r.enc_spo2 }}</td>
+                <td class="height_cm">{{ r.enc_height_cm }}</td>
+                <td class="weight_kg">{{ r.enc_weight_kg }}</td>
+                <td class="action-cell">
+                    <button class="decrypt-btn" data-id="{{ r.report_enc_id }}" data-action="decrypt">Decrypt</button>
+                    <button class="encrypt-toggle-btn" data-id="{{ r.report_enc_id }}" style="display:none;">Encrypt</button>
+                    {% if r.enc_file_path %}
+                    <button class="file-dl-btn" data-id="{{ r.report_enc_id }}" data-action="download_file">&#8595; File</button>
+                    {% endif %}
+                    <button class="pdf-btn" data-id="{{ r.report_enc_id }}" data-action="full_pdf">Full PDF</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Unified Key Modal -->
+    <div class="modal" id="keyModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Enter Nurse Key</h3>
+            <input type="password" id="nurseKey" placeholder="Enter key">
+            <div class="modal-btns">
+                <button id="submitKey" class="modal-submit-btn">Submit</button>
+                <button id="cancelModal" class="modal-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+let currentReportId = null;
+let currentAction   = null;   // 'decrypt' | 'download_file' | 'full_pdf'
+
+// Open modal ONLY for table action buttons (those with data-action attribute)
+$(document).on("click", "button[data-action]", function(){
+    currentReportId = $(this).data("id");
+    currentAction   = $(this).data("action");
+
+    const titles = {
+        decrypt:       "Decrypt Vitals",
+        download_file: "Download Decrypted File",
+        full_pdf:      "Download Full PDF Report"
+    };
+    $("#modalTitle").text(titles[currentAction] || "Enter Nurse Key");
+    $("#nurseKey").val("");
+    $("#keyModal").css("display","flex");
+});
+
+$("#cancelModal").click(function(){
+    $("#keyModal").hide();
+    $("#nurseKey").val("");
+});
+
+$("#submitKey").click(function(){
+    const key = $("#nurseKey").val().trim();
+    if(!key){ alert("Please enter the key."); return; }
+
+    if(currentAction === "decrypt"){
+        // AJAX decrypt vitals
+        $.ajax({
+            url: "/doctor/decrypt_report",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({report_enc_id: currentReportId, key: key}),
+            success: function(res){
+                if(res.status === "success"){
+                    const row = $("#row-" + currentReportId);
+                    row.find(".temperature").text(res.report.temperature);
+                    row.find(".pulse_rate").text(res.report.pulse_rate);
+                    row.find(".spo2").text(res.report.spo2);
+                    row.find(".height_cm").text(res.report.height_cm);
+                    row.find(".weight_kg").text(res.report.weight_kg);
+                    // Toggle buttons: hide Decrypt, show Encrypt
+                    row.find(".decrypt-btn").hide();
+                    row.find(".encrypt-toggle-btn").show();
+                    $("#keyModal").hide();
+                    $("#nurseKey").val("");
+                } else {
+                    alert(res.msg);
+                }
+            }
+        });
+
+    } else if(currentAction === "download_file"){
+        // Open new tab → server decrypts & sends file
+        const url = "/doctor/download_file_direct/" + currentReportId + "?key=" + encodeURIComponent(key);
+        window.open(url, "_blank");
+        $("#keyModal").hide();
+        $("#nurseKey").val("");
+
+    } else if(currentAction === "full_pdf"){
+        // Open new tab → server generates PDF
+        const url = "/doctor/download_full_report/" + currentReportId + "?key=" + encodeURIComponent(key);
+        window.open(url, "_blank");
+        $("#keyModal").hide();
+        $("#nurseKey").val("");
+    }
+});
+
+// Encrypt toggle: restore cipher text and swap buttons back
+$(document).on("click", ".encrypt-toggle-btn", function(){
+    const id  = $(this).data("id");
+    const row = $("#row-" + id);
+    row.find(".temperature").text(row.attr("data-enc-temperature"));
+    row.find(".pulse_rate").text(row.attr("data-enc-pulse_rate"));
+    row.find(".spo2").text(row.attr("data-enc-spo2"));
+    row.find(".height_cm").text(row.attr("data-enc-height_cm"));
+    row.find(".weight_kg").text(row.attr("data-enc-weight_kg"));
+    // Toggle buttons: hide Encrypt, show Decrypt
+    row.find(".encrypt-toggle-btn").hide();
+    row.find(".decrypt-btn").show();
+});
+</script>
+</body>
+</html>

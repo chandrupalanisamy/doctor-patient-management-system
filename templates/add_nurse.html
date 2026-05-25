@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Nurse</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background-color: #f8f9fa; 
+            margin: 0;
+        }
+
+        nav {
+            background-color: #000;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 15px 20px;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        nav a:hover { background-color: #333; }
+        nav a.logout { background-color: #dc3545; }
+        nav a.logout:hover { background-color: #c82333; }
+
+        h2 { color: #343a40; margin: 20px 0; text-align: center; }
+
+        form { 
+            background-color: #fff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            max-width: 500px; 
+            margin: 30px auto; 
+        }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ced4da; }
+        button { background-color: #0d6efd; color: #fff; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #0b5ed7; }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background-color: #fff; 
+            border-radius: 8px; 
+            overflow: hidden; 
+        }
+        table th, table td { 
+            padding: 10px; 
+            text-align: left; 
+            border-bottom: 1px solid #dee2e6; 
+        }
+        table th { 
+            background-color: #0d6efd; 
+            color: #fff; 
+        }
+
+        .alert { 
+            color: green; 
+            margin-top: 10px; 
+            max-width: 500px; 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <a href="/add_patient">Add Patient</a>
+        <a href="/add_nurse">Add Nurse</a>
+        <a href="/add_doctor">Add Doctor</a>
+        <a href="/allot_patient">Allot Patient</a>
+        <a href="/logout" class="logout">Logout</a>
+    </nav>
+
+    <h2>Add Nurse</h2>
+    
+    <form method="POST">
+        <label>Name:</label>
+        <input type="text" name="name" required>
+
+        <label>Email:</label>
+        <input type="email" name="email" required>
+
+        <label>Password:</label>
+        <input type="password" name="password" required>
+
+        <label>Mobile:</label>
+        <input type="text" name="mobile" required>
+
+        <label>Key:</label>
+        <input type="text" name="key" required>
+
+        <button type="submit">Add Nurse</button>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert">{% for msg in messages %}<p>{{ msg }}</p>{% endfor %}</div>
+        {% endif %}
+    {% endwith %}
+
+    <h3 style="text-align:center;">All Nurses</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Name</th><th>Email</th><th>Mobile</th><th>Key</th><th>Password</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for nurse in nurses %}
+            <tr>
+                <td>{{ nurse.id }}</td>
+                <td>{{ nurse.name }}</td>
+                <td>{{ nurse.email }}</td>
+                <td>{{ nurse.mobile }}</td>
+                <td>{{ nurse.key }}</td>
+                <td>{{ nurse.password }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

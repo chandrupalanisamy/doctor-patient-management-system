@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Report - Nurse Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f8f9fa;
+        }
+
+        /* Navbar styling */
+        nav {
+            background-color: #060a0fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 15px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            background-color: #0b0c0cff;
+        }
+
+        nav a.logout {
+            background-color: #dc3545;
+        }
+
+        nav a.logout:hover {
+            background-color: #c82333;
+        }
+
+        nav .brand {
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: auto;
+        }
+
+        h2 {
+            color: #343a40;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+
+        .form-container, .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0c0f13ff;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0d0e0fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #dee2e6;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #07080aff;
+            color: #fff;
+        }
+
+        .encrypt-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .encrypt-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand">Add Report</div>
+        <a href="/nurse_dashboard">Home</a>
+        <a href="/add_report">Add Report</a>
+        <a href="/logout" class="logout">Logout</a>
+    </nav>
+
+    <div class="container">
+
+        <h2>Add Report</h2>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+              {% for message in messages %}
+                <li style="color: green; font-weight: bold;">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Add Report Form -->
+        <div class="form-container">
+            <form method="POST" action="/add_report" enctype="multipart/form-data">
+                <label for="patient_id">Select Patient:</label>
+                <select name="patient_id" id="patient_id" required>
+                    <option value="" disabled selected>-- Select Patient --</option>
+                    {% for patient in patients %}
+                        <option value="{{ patient.id }}">{{ patient.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="temperature">Temperature °C:</label>
+                <input type="text" name="temperature" id="temperature" required placeholder="in Celsius">
+
+                <label for="pulse_rate">Pulse Rate :</label>
+                <input type="text" name="pulse_rate" id="pulse_rate" required placeholder="in bpm">
+
+                <label for="spo2">SPO2 :</label>
+                <input type="text" name="spo2" id="spo2" required placeholder="in %">
+
+                <label for="height_cm">Height:</label>
+                <input type="text" name="height_cm" id="height_cm" required placeholder="in cm">
+
+                <label for="weight_kg">Weight:</label>
+                <input type="text" name="weight_kg" id="weight_kg" required placeholder="in kg">
+
+                <label for="report_file">Upload Report File (optional):</label>
+                <input type="file" name="report_file" id="report_file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.txt">
+                <small style="color:#6c757d;">Accepted: PDF, images, documents. File will be encrypted automatically.</small>
+
+                <button type="submit">Add Report</button>
+            </form>
+        </div>
+
+        <!-- Reports Table -->
+        <div class="table-container">
+            <h3>All Reports</h3>
+            <table>
+                <tr>
+                    <th>Patient Name</th>
+                    <th>Temperature</th>
+                    <th>Pulse Rate</th>
+                    <th>SPO2</th>
+                    <th>Height (cm)</th>
+                    <th>Weight (kg)</th>
+                    <th>Action</th>
+                </tr>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.patient_name }}</td>
+                    <td>{{ report.temperature }}</td>
+                    <td>{{ report.pulse_rate }}</td>
+                    <td>{{ report.spo2 }}</td>
+                    <td>{{ report.height_cm }}</td>
+                    <td>{{ report.weight_kg }}</td>
+                    <td>
+                        <form method="POST" action="/encrypt_report/{{ report.id }}">
+                            <button type="submit" class="encrypt-btn">Encrypt</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>

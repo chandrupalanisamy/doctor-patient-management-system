@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Encrypted Reports Table</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-image: url("{{ url_for('static', filename='images/bg.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        nav {
+            background-color: rgba(25,27,31,0.9);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 15px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        nav a:hover { background-color: #101113ff; }
+        nav a.logout { background-color: #dc3545; }
+        nav a.logout:hover { background-color: #c82333; }
+        nav .brand { color: #fff; font-size: 20px; font-weight: bold; margin-right: auto; }
+
+        h2 { color: #fff; text-align: center; margin: 20px 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.7); }
+
+        .table-wrapper {
+            width: 98%;
+            margin: 20px auto;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: rgba(255,255,255,0.97);
+            border-radius: 12px;
+            overflow: hidden;
+            min-width: 700px;
+        }
+
+        th, td {
+            padding: 11px 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            word-break: break-all;
+        }
+
+        th { background-color: #111213; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+
+        button {
+            padding: 6px 12px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">Nurse Dashboard</div>
+        <a href="/nurse_dashboard">Home</a>
+        <a href="/add_report">Add Report</a>
+        <a href="/view_report_enc_table">View Encrypted Reports</a>
+        <a href="/logout" class="logout">Logout</a>
+    </nav>
+
+    <h2>Encrypted Reports</h2>
+
+    <div class="table-wrapper">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Patient</th>
+                <th>Temperature</th>
+                <th>Pulse Rate</th>
+                <th>SPO2</th>
+                <th>Height</th>
+                <th>Weight</th>
+                <th>Original File</th>
+            </tr>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.id }}</td>
+                <td>{{ report.patient_name }}</td>
+                <td>{{ report.enc_temperature }}</td>
+                <td>{{ report.enc_pulse_rate }}</td>
+                <td>{{ report.enc_spo2 }}</td>
+                <td>{{ report.enc_height_cm }}</td>
+                <td>{{ report.enc_weight_kg }}</td>
+                <td>{% if report.original_filename %}{{ report.original_filename }}{% else %}<span style="color:#aaa;">No file</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</body>
+</html>

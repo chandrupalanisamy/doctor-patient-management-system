@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hospital Management Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            width: 400px;
+        }
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .login-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .login-container input, .login-container select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="error">
+              {% for message in messages %}
+                {{ message }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        <form method="POST" id="loginForm">
+            <label for="user_type">User Type</label>
+            <select name="user_type" id="user_type" required>
+                <option value="">Select User Type</option>
+                <option value="admin">Admin</option>
+                <option value="nurse">Nurse</option>
+                <option value="doctor">Doctor</option>
+            </select>
+
+            <label for="username_email">Username / Email</label>
+            <input type="text" name="username_email" id="username_email" placeholder="Enter username/email" required>
+
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" placeholder="Enter password" required>
+
+            <!-- Hidden fields for location -->
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <script>
+        const userTypeSelect = document.getElementById('user_type');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+
+        function setLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    latitudeInput.value = position.coords.latitude;
+                    longitudeInput.value = position.coords.longitude;
+                }, function(error) {
+                    alert('Location access is required for login. Please allow location access.');
+                    latitudeInput.value = '';
+                    longitudeInput.value = '';
+                    userTypeSelect.value = '';
+                });
+            } else {
+                alert('Geolocation is not supported by your browser.');
+                latitudeInput.value = '';
+                longitudeInput.value = '';
+                userTypeSelect.value = '';
+            }
+        }
+
+        userTypeSelect.addEventListener('change', function() {
+            if (this.value === 'admin' || this.value === 'doctor') {
+                setLocation();
+            } else {
+                latitudeInput.value = '';
+                longitudeInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
